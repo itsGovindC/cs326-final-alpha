@@ -16,15 +16,15 @@ From our landing page, users can go to either a "Leave a Review page", which is 
 
 On the leave a review page,  users can enter their reviews. We require the users to enter a dining hall and dish, as well as text review. We will also try to incorporate numeric ratings.
 
-![](/ReviewPage.JPG)
+![Leave a Review Page](/ReviewPage.JPG)
 
 Before this however, we will require them to enter their login, which will either create an account for them (if signup page), or validate them.
 
-![](/LoginPage.JPG)
+![Login Page](/LoginPage.JPG)
 
 On the view a review page, we can sort out the reviews based on dining halls first, then specific dishes. We will try to incorporate functionality that allows users to select whatever is being served without having to manually type all the dishes ourselves.
 
-![](/SeeReviewPage.JPG)
+![Review Page](/SeeReviewPage.JPG)
 
 
 
