@@ -1,7 +1,3 @@
----
-typora-root-url: ./
----
-
 In our project, the data interactions will be mainly in the form of reviews.
 
 We will be storing user reviews, where users will be allowed to select a dish, dining hall, assign a a text review. These will be associated with the user's ID and password, since they can only access the review page after they have logged in.
