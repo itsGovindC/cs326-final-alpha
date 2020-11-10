@@ -9,7 +9,6 @@ From our landing page, users can go to either a "Leave a Review page", which is 
 ![Landing Page](./LandingPage.JPG)
 
 
-
 On the leave a review page,  users can enter their reviews. We require the users to enter a dining hall and dish, as well as text review. We will also try to incorporate numeric ratings.
 
 ![Leave a Review Page](./ReviewPage.JPG)
