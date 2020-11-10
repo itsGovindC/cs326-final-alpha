@@ -1,6 +1,6 @@
 'use strict';
 import express from 'express'
-import { returnReview } from './database.js'
+import { returnUserReview } from './database.js'
 
 import { parse } from 'url';
 import { join } from 'path';
@@ -11,13 +11,14 @@ app.use(express.json()); // lets you handle JSON input
 const port = process.env.PORT || 8080;
 
 app.get('/readReviews', (req, res) => {
-    res.end(JSON.stringify(returnReview(10)));
+    res.end(JSON.stringify(returnUserReview(req.name)));
 });
 app.post('/updateReview', (req, res) => {
     let body = '';
     req.on('data', data => body += data);
     req.on('end', () => {
         const data = JSON.parse(body);
+        console.log(body);
         //update score here through database code
     });
     res.writeHead(202);
@@ -38,7 +39,7 @@ app.get('*', (req, res) => {
     const parsed = parse(req.url, true);
     const filename = parsed.pathname === '/' ? "index.html" : parsed.pathname.replace('/', '');
     const path = join("client/", filename);
-    console.log("trying to serve " + path + "...");
+    //console.log("trying to serve " + path + "...");
     if (existsSync(path)) {
         if (filename.endsWith("html")) {
             res.writeHead(200, { "Content-Type": "text/html" });
