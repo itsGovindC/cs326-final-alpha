@@ -2,7 +2,7 @@
     "name": "zoomass_dine_in",
     "type": "module",
     "scripts": {
-        "start": "node server/index.js",
+        "start": "node server/server.js",
         "lint": "eslint client/ server/"
     },
     "dependencies": {
