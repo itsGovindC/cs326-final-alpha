@@ -11,21 +11,24 @@
 
 <body class="container p-3 mb-2 bg-danger text-white">
     <div class="container align-middle text-center" id="title-text">
-        <h1>Student Log-in</h1>
+        <h1>Register your account</h1>
     </div>
     <form>
         <div class="form-group">
-          <label for="username">Username</label>
+            <label for="name">Enter your full name:</label>
+            <input type="full-name" class="form-control" id="full-name">
+        </div>
+
+        <div class="form-group">
+          <label for="username">Enter a Username:</label>
           <input type="text" class="form-control" id="username" aria-describedby="usernameHelp">
-          <small id="usernameHelp" class="form-text">We'll never share your details with anyone else.</small>
+ 
         </div>
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="password">Enter a Password:</label>
           <input type="password" class="form-control" id="password">
         </div>
-        <button type="submit" class="btn btn-light" id="submit">Submit</button>
-        <small class="form-text"> If you don't have a login click here to <a href="./register.html" >register</a></small>
-
+        <button type="sign up" class="btn btn-light">Sign Up </button>
       </form>
 
 </body>
