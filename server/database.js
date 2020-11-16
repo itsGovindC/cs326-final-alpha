@@ -29,3 +29,11 @@ export function returnReviews() {
     }
     return arr_1;
 }
+
+export function findUser(username) {
+    return true;
+}
+
+export function validatePassword(username,password) {
+    return true;
+}

@@ -1,13 +1,15 @@
 'use strict';
 import express from 'express';
-import { returnUserReview, returnReviews } from './database.js';
+import { returnUserReview, returnReviews,findUser,validatePassword } from './database.js';
 
-import { parse } from 'url';
+import { parse ,fileURLToPath} from 'url';
 import { join } from 'path';
+import path from 'path';
 import { readFileSync, existsSync } from 'fs';
 
+
 import dotenv from 'dotenv';
-dotenv.config()
+dotenv.config();
 
 import expressSession from 'express-session';
 import passport from 'passport';
@@ -25,17 +27,20 @@ const session = {
 const strategy = new LocalStrategy(
     async (username, password, done) => {
 	if (!findUser(username)) {
-	    // no such user
+        // no such user
+        console.log('1');
 	    return done(null, false, { 'message' : 'Wrong username' });
 	}
 	if (!validatePassword(username, password)) {
 	    // invalid password
 	    // should disable logins after N messages
 	    // delay return to rate-limit brute-force attacks
-	    await new Promise((r) => setTimeout(r, 2000)); // two second delay
+        await new Promise((r) => setTimeout(r, 2000)); // two second delay
+        console.log('2');
 	    return done(null, false, { 'message' : 'Wrong password' });
 	}
-	// success!
+    // success!
+    console.log('3');
 	// should create a user object here, associated with a unique identifier
 	return done(null, username);
     });
@@ -56,6 +61,30 @@ passport.deserializeUser((user, done) => {
 });
 app.use(express.json()); // allow JSON inputs
 app.use(express.urlencoded({'extended' : true}));
+
+function checkLoggedIn(req, res, next) {
+    if (req.isAuthenticated()) {
+	// If we are authenticated, run the next route.
+	next();
+    } else {
+	// Otherwise, redirect to the login page.
+	res.redirect('/login');
+    }
+}
+
+app.get('/',checkLoggedIn,(req, res) => { 
+    res.sendFile(path.resolve('client/index.html'));
+});
+
+app.post('/login',
+	passport.authenticate('local' , {     
+	     'successRedirect' : '/',  
+	     'failureRedirect' : '/login'     
+    })
+);
+app.get('/login',(req, res) => { 
+    res.sendFile(path.resolve('client/login.html'));
+});
 
 
 app.get('/readReviews', (req, res) => {
