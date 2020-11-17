@@ -1,51 +1,55 @@
 'use strict';
-import express from 'express';
-import { returnUserReview, returnReviews,findUser,validatePassword } from './database.js';
 
-import { parse ,fileURLToPath} from 'url';
-import { join } from 'path';
-import path from 'path';
-import { readFileSync, existsSync } from 'fs';
-
-
+// For loading environment variables.
 import dotenv from 'dotenv';
 dotenv.config();
+import path from 'path';
+const __dirname = path.resolve();
 
+import express from 'express'; // express routing
 import expressSession from 'express-session';
 import passport from 'passport';
-import LocalStrategy from 'passport-local';
-
-const port = process.env.PORT || 8080;
+import passportLocal from 'passport-local';
+const LocalStrategy = passportLocal.Strategy;
 const app = express();
+const port = process.env.PORT || 8080;
+import { returnUserReview, returnReviews, addUser, validatePassword, findUser } from './database.js';
+
+import { parse } from 'url';
+import { join } from 'path';
+import { readFileSync, existsSync } from 'fs';
+
+// Session configuration
 
 const session = {
-    secret : process.env.SECRET || 'SECRET', // set this encryption key in Heroku config (never in GitHub)!
-    resave : false,
+    secret: process.env.SECRET || 'SECRET', // set this encryption key in Heroku config (never in GitHub)!
+    resave: false,
     saveUninitialized: false
 };
+
 // Passport configuration
+
 const strategy = new LocalStrategy(
-    async (username, password, done) => {
-	if (!findUser(username)) {
-        // no such user
-        console.log('1');
-	    return done(null, false, { 'message' : 'Wrong username' });
-	}
-	if (!validatePassword(username, password)) {
-	    // invalid password
-	    // should disable logins after N messages
-	    // delay return to rate-limit brute-force attacks
-        await new Promise((r) => setTimeout(r, 2000)); // two second delay
-        console.log('2');
-	    return done(null, false, { 'message' : 'Wrong password' });
-	}
-    // success!
-    console.log('3');
-	// should create a user object here, associated with a unique identifier
-	return done(null, username);
+    async(username, password, done) => {
+        if (!findUser(username)) {
+            // no such user
+            return done(null, false, { 'message': 'Wrong username' });
+        }
+        if (!validatePassword(username, password)) {
+            // invalid password
+            // should disable logins after N messages
+            // delay return to rate-limit brute-force attacks
+            await new Promise((r) => setTimeout(r, 2000)); // two second delay
+            return done(null, false, { 'message': 'Wrong password' });
+        }
+        // success!
+        // should create a user object here, associated with a unique identifier
+        return done(null, username);
     });
 
+
 // App configuration
+
 app.use(expressSession(session));
 passport.use(strategy);
 app.use(passport.initialize());
@@ -56,48 +60,102 @@ passport.serializeUser((user, done) => {
     done(null, user);
 });
 // Convert a unique identifier to a user object.
-passport.deserializeUser((user, done) => {
-    done(null, user);
+passport.deserializeUser((uid, done) => {
+    done(null, uid);
 });
+
 app.use(express.json()); // allow JSON inputs
-app.use(express.urlencoded({'extended' : true}));
+app.use(express.urlencoded({ 'extended': true })); // allow URLencoded data
+
+// Routes
 
 function checkLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
-	// If we are authenticated, run the next route.
-	next();
+        // If we are authenticated, run the next route.
+        next();
     } else {
-	// Otherwise, redirect to the login page.
-	res.redirect('/login');
+        // Otherwise, redirect to the login page.
+        res.redirect('/login');
     }
 }
 
-app.get('/',checkLoggedIn,(req, res) => { 
-    res.sendFile(path.resolve('client/index.html'));
-});
+function post_authenticate(req, res, next) {
+    if (req.isAuthenticated()) {
+        // If we are authenticated, run the next route.
+        next();
+    } else {
+        // Otherwise, redirect to the login page.
+        res.end('{}');
+    }
+}
 
+app.get('/',
+    checkLoggedIn,
+    (req, res) => {
+        res.sendFile('client/index.html', { 'root': __dirname })
+    });
+
+// Handle post data from the login.html form.
 app.post('/login',
-	passport.authenticate('local' , {     
-	     'successRedirect' : '/',  
-	     'failureRedirect' : '/login'     
-    })
-);
-app.get('/login',(req, res) => { 
-    res.sendFile(path.resolve('client/login.html'));
-});
+    passport.authenticate('local', { // use username/password authentication
+        'successRedirect': '/', // when we login, go to /private 
+        'failureRedirect': '/login' // otherwise, back to login
+    }));
 
+// Handle the URL /login (just output the login.html file).
+app.get('/login',
+    (req, res) => res.sendFile('client/login.html', { 'root': __dirname }));
+
+app.post('/register',
+    (req, res) => {
+        const username = req.body['username'];
+        const password = req.body['password'];
+        console.log('jo');
+        if (addUser(username, password)) {
+            res.redirect('/login');
+        } else {
+            res.redirect('/register');
+        }
+    });
+
+// Register URL
+app.get('/register',
+    (req, res) => res.sendFile('client/register.html', { 'root': __dirname }));
+
+app.get('/viewUserReview',
+    checkLoggedIn, // If we are logged in (notice the comma!)...
+    (req, res) => { // Go to the user's page.
+        res.sendFile('client/viewUserReview.html', { 'root': __dirname });
+    });
+
+app.post('/viewUserReview',
+    post_authenticate,
+    function(req, res) {
+        res.end(JSON.stringify(returnUserReview(req.user)));
+    });
+
+app.get('/leaveReview',
+    checkLoggedIn, // If we are logged in (notice the comma!)...
+    (req, res) => { // Go to the user's page.
+        res.sendFile('client/leaveReview.html', { 'root': __dirname });
+    });
+app.post('/leaveReview',
+    post_authenticate,
+    function(req, res) {
+        res.end(JSON.stringify(returnUserReview(req.user)));
+    });
+app.get('/viewReview',
+    checkLoggedIn, // If we are logged in (notice the comma!)...
+    (req, res) => { // Go to the user's page.
+        res.sendFile('client/viewReview.html', { 'root': __dirname });
+    });
 
 app.get('/readReviews', (req, res) => {
-    if ('user' in req.query) {
-        res.end(JSON.stringify(returnUserReview(req.query.user)));
-        console.log('Viewing user reviews for user: ' + req.query.user);
-    } else {
-        res.end(JSON.stringify(returnReviews()));
-        console.log('Main reviews loading...');
-    }
-
+    res.end(JSON.stringify(returnReviews()));
+    console.log('Main reviews loading...');
 });
-app.post('/updateReview', (req, res) => {
+
+app.post('/updateReview', post_authenticate, (req, res) => {
     let body = '';
     req.on('data', data => body += data);
     req.on('end', () => {
@@ -108,7 +166,7 @@ app.post('/updateReview', (req, res) => {
     res.writeHead(202);
     res.end();
 });
-app.post('/deleteReview', (req, res) => {
+app.post('/deleteReview', post_authenticate, (req, res) => {
     let body = '';
     req.on('data', data => body += data);
     req.on('end', () => {
@@ -119,7 +177,7 @@ app.post('/deleteReview', (req, res) => {
     res.writeHead(200);
     res.end();
 });
-app.post('/createReview', (req, res) => {
+app.post('/createReview', post_authenticate, (req, res) => {
     let body = '';
     req.on('data', data => body += data);
     req.on('end', () => {
@@ -138,16 +196,22 @@ app.get('*', (req, res) => {
     //console.log("trying to serve " + path + "...");
     if (existsSync(path)) {
         if (filename.endsWith("html")) {
-            res.writeHead(200, { "Content-Type": "text/html" });
+            res.writeHead(404);
+            res.end();
         } else if (filename.endsWith("css")) {
             res.writeHead(200, { "Content-Type": "text/css" });
+            res.write(readFileSync(path));
+            res.end();
         } else if (filename.endsWith("js")) {
             res.writeHead(200, { "Content-Type": "text/javascript" });
+            res.write(readFileSync(path));
+            res.end();
         } else {
             res.writeHead(200);
+            res.write(readFileSync(path));
+            res.end();
         }
-        res.write(readFileSync(path));
-        res.end();
+
     } else {
         res.writeHead(404);
         res.end();
