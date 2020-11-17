@@ -29,3 +29,36 @@ export function returnReviews() {
     }
     return arr_1;
 }
+
+// we use an in-memory "database"; this isn't persistent but is easy
+let users = { 'emery': 'compsci326' } // default user
+
+// Returns true iff the user exists.
+export function findUser(username) {
+    if (!users[username]) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+// Returns true iff the password is the one we have stored (in plaintext = bad but easy).
+export function validatePassword(name, pwd) {
+    if (!findUser(name)) {
+        return false;
+    }
+    if (users[name] !== pwd) {
+        return false;
+    }
+    return true;
+}
+
+// Add a user to the "database".
+// Return true if added, false otherwise (because it was already there).
+export function addUser(name, pwd) {
+    if (findUser(name)) {
+        return false;
+    }
+    users[name] = pwd;
+    return true;
+}
