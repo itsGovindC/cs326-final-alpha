@@ -1,7 +1,5 @@
-function addReviews() {
-    const user = "pari"; //replace with actual user later, using some session storage
-
-    fetch('/readReviews?user=' + user).then(data => data.json()).then((success) => {
+async function addReviews() {
+    fetch('/viewUserReview', { method: "POST" }).then(data => data.json()).then((success) => {
         const body_1 = document.getElementById('main-review-body');
         let id = 0;
         success.forEach(element => {
@@ -30,7 +28,7 @@ function addReviews() {
                     obj['dish'] = document.getElementById(`Dish-${cur_id}`).value;
                     obj['review'] = document.getElementById(`Review-${cur_id}`).value;
                     obj['reviewid'] = document.getElementById(`review-id-${cur_id}`).value;
-                    fetch('/updateReview?user=' + user, {
+                    fetch('/updateReview', {
                         method: 'POST',
                         body: JSON.stringify(obj)
                     });
