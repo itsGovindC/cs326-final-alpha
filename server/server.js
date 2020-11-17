@@ -19,6 +19,7 @@ import { parse } from 'url';
 import { join } from 'path';
 import { readFileSync, existsSync } from 'fs';
 
+
 // Session configuration
 
 const session = {
@@ -31,11 +32,13 @@ const session = {
 
 const strategy = new LocalStrategy(
     async(username, password, done) => {
-        if (!findUser(username)) {
+        const foundUser = await findUser(username);
+        if (!foundUser) {
             // no such user
             return done(null, false, { 'message': 'Wrong username' });
         }
-        if (!validatePassword(username, password)) {
+        const valPass = await validatePassword(username,password);
+        if (!valPass) {
             // invalid password
             // should disable logins after N messages
             // delay return to rate-limit brute-force attacks
