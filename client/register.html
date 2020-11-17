@@ -13,23 +13,23 @@
     <div class="container align-middle text-center" id="title-text">
         <h1>Register your account</h1>
     </div>
-    <form>
+    <form action="/register" method="post">
         <div class="form-group">
             <label for="name">Enter your full name:</label>
-            <input type="full-name" class="form-control" id="full-name">
+            <input type="full-name" class="form-control" name="full-name">
         </div>
 
         <div class="form-group">
-          <label for="username">Enter a Username:</label>
-          <input type="text" class="form-control" id="username" aria-describedby="usernameHelp">
- 
+            <label for="username">Enter a Username:</label>
+            <input type="text" class="form-control" name="username" aria-describedby="usernameHelp">
+
         </div>
         <div class="form-group">
-          <label for="password">Enter a Password:</label>
-          <input type="password" class="form-control" id="password">
+            <label for="password">Enter a Password:</label>
+            <input type="password" class="form-control" name="password">
         </div>
-        <button type="sign up" class="btn btn-light">Sign Up </button>
-      </form>
+        <input type="submit" class="btn btn-light" value="Signup" />
+    </form>
 
 </body>
 
