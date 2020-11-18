@@ -13,8 +13,10 @@ const pgp = pgPromise({
     }
 });
 
+const username = "postgres";
+const password = "admin";
 
-const url = process.env.DATABASE_URL || 'postgres://postgres@localhost/';
+const url = process.env.DATABASE_URL || `postgres://${username}:${password}@localhost/`;
 const db = pgp(url);
 
 
@@ -27,7 +29,7 @@ async function connectAndRun(task) {
     } finally {
         try {
             connection.done();
-        } catch(ignored) {
+        } catch (ignored) {
             console.log('IGNORED CONNECTION');
         }
     }
@@ -38,7 +40,7 @@ async function checkUser(username) {
 }
 
 async function returnUser(username) {
-    return await connectAndRun(db => db.one('SELECT * from diningusers WHERE username = $1);', username));
+    return await connectAndRun(db => db.one('SELECT * from diningusers WHERE username = $1 LIMIT 1;', username));
 }
 
 async function insertUser(username, salt, hash) {
@@ -79,11 +81,6 @@ export function returnReviews() {
     return arr_1;
 }
 
-// we use an in-memory "database"; this isn't persistent but is easy
-let users = { 'emery' : [
-    '2401f90940e037305f71ffa15275fb0d',
-    '61236629f33285cbc73dc563cfc49e96a00396dc9e3a220d7cd5aad0fa2f3827d03d41d55cb2834042119e5f495fc3dc8ba3073429dd5a5a1430888e0d115250'
-  ] }; // default user
 
 // Returns true iff the user exists.
 export async function findUser(username) {
@@ -94,11 +91,10 @@ export async function findUser(username) {
 export async function validatePassword(name, pwd) {
     const foundUser = await findUser(name);
     if (!foundUser) {
-	    return false;
+        return false;
     }
-    const userVal = await returnUser(name)
-    console.log(userVal)
-	return mc.check(pwd,userVal.salt,userVal.hash);
+    const userVal = await returnUser(name);
+    return mc.check(pwd, userVal.salt, userVal.hash);
 }
 
 // Add a user to the "database".
@@ -106,9 +102,9 @@ export async function validatePassword(name, pwd) {
 export async function addUser(name, pwd) {
     const foundUser = await findUser(name);
     if (foundUser) {
-	return false;
+        return false;
     }
     const resp = mc.hash(pwd);
-    insertUser(name,resp[0],resp[1]);
+    insertUser(name, resp[0], resp[1]);
     return true;
 }
