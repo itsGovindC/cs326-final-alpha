@@ -32,13 +32,11 @@ const session = {
 
 const strategy = new LocalStrategy(
     async(username, password, done) => {
-        const foundUser = await findUser(username);
-        if (!foundUser) {
+        if (!findUser(username)) {
             // no such user
             return done(null, false, { 'message': 'Wrong username' });
         }
-        const valPass = await validatePassword(username,password);
-        if (!valPass) {
+        if (!validatePassword(username, password)) {
             // invalid password
             // should disable logins after N messages
             // delay return to rate-limit brute-force attacks
