@@ -13,7 +13,7 @@ import passportLocal from 'passport-local';
 const LocalStrategy = passportLocal.Strategy;
 const app = express();
 const port = process.env.PORT || 8080;
-import { returnUserReview, returnReviews, addUser, validatePassword, findUser } from './database.js';
+import { returnUserReview, returnReviews, addUser, validatePassword, findUser, insertReview, deleteReview, updateReview } from './database.js';
 
 import { parse } from 'url';
 import { join } from 'path';
@@ -103,6 +103,12 @@ app.post('/login',
         'failureRedirect': '/login' // otherwise, back to login
     }));
 
+app.get('/logout', (req, res) => {
+    req.logout(); // Logs us out!
+    res.redirect('/login'); // back to login
+});
+
+
 // Handle the URL /login (just output the login.html file).
 app.get('/login',
     (req, res) => res.sendFile('client/login.html', { 'root': __dirname }));
@@ -111,7 +117,6 @@ app.post('/register',
     (req, res) => {
         const username = req.body['username'];
         const password = req.body['password'];
-        console.log('jo');
         if (addUser(username, password)) {
             res.redirect('/login');
         } else {
@@ -131,8 +136,8 @@ app.get('/viewUserReview',
 
 app.post('/viewUserReview',
     post_authenticate,
-    function(req, res) {
-        res.end(JSON.stringify(returnUserReview(req.user)));
+    async function(req, res) {
+        res.end(JSON.stringify(await returnUserReview(req.user)));
     });
 
 app.get('/leaveReview',
@@ -140,21 +145,18 @@ app.get('/leaveReview',
     (req, res) => { // Go to the user's page.
         res.sendFile('client/leaveReview.html', { 'root': __dirname });
     });
-app.post('/leaveReview',
-    post_authenticate,
-    function(req, res) {
-        res.end(JSON.stringify(returnUserReview(req.user)));
-    });
+
 app.get('/viewReview',
     checkLoggedIn, // If we are logged in (notice the comma!)...
     (req, res) => { // Go to the user's page.
         res.sendFile('client/viewReview.html', { 'root': __dirname });
     });
 
-app.get('/readReviews', (req, res) => {
-    res.end(JSON.stringify(returnReviews()));
-    console.log('Main reviews loading...');
-});
+app.post('/readReviews',
+    post_authenticate,
+    async function(req, res) {
+        res.end(JSON.stringify(await returnReviews()));
+    });
 
 app.post('/updateReview', post_authenticate, (req, res) => {
     let body = '';
@@ -162,6 +164,7 @@ app.post('/updateReview', post_authenticate, (req, res) => {
     req.on('end', () => {
         const data = JSON.parse(body);
         console.log('Updated: ' + JSON.stringify(data));
+        updateReview(data.id, data.dining, data.dish, data.review);
         //update score here through database code updateDatabase(data)
     });
     res.writeHead(202);
@@ -172,7 +175,8 @@ app.post('/deleteReview', post_authenticate, (req, res) => {
     req.on('data', data => body += data);
     req.on('end', () => {
         const data = JSON.parse(body);
-        console.log('deleted review with id : ' + data.reviewid);
+        console.log('deleted review with id : ' + data.id);
+        deleteReview(data.id);
         //update score here through database code updateDatabase(data)
     });
     res.writeHead(200);
@@ -184,6 +188,7 @@ app.post('/createReview', post_authenticate, (req, res) => {
     req.on('end', () => {
         const data = JSON.parse(body);
         //create score here through database code
+        insertReview(req.user, data.dining, data.dish, data.review);
         console.log(JSON.stringify(data));
     });
     res.writeHead(201);

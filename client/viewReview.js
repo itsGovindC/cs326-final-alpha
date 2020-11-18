@@ -1,6 +1,7 @@
 window.addEventListener('load', async function() {
-    fetch('/readReviews').then(data => data.json()).then((success) => {
+    fetch('/readReviews', { method: "POST" }).then(data => data.json()).then((success) => {
         let id = 0;
+        console.log(success);
         const body = document.getElementById('main-body');
         const dining = ["Berkshire", "Frank", "Worcester", "Hampshire", "Blue Wall"];
         success.forEach(element => {
@@ -12,7 +13,7 @@ window.addEventListener('load', async function() {
                 `<footer class="blockquote-footer">Dish: <cite title="Source Title" id="dish-${id}">Sushi</cite></footer></blockquote></div>` +
                 `<footer class="blockquote-footer">Dining Hall: <cite title="Source Title" id="dining-${id}">Berkshire</cite></footer>`;
             body.appendChild(curItem);
-            document.getElementById(`name-${id}`).innerHTML = "&#128366; " + element.name;
+            document.getElementById(`name-${id}`).innerHTML = "&#128366; " + element.username.toUpperCase();
             document.getElementById(`description-${id}`).innerHTML = element.review;
             document.getElementById(`dish-${id}`).innerHTML = element.dish;
             document.getElementById(`dining-${id}`).innerHTML = dining[parseInt(element.dining)];

@@ -47,38 +47,36 @@ async function insertUser(username, salt, hash) {
     return await connectAndRun(db => db.none("INSERT INTO diningusers VALUES ($1, $2, $3)", [username, salt, hash]));
 }
 
+export async function insertReview(username, dining, dish, review) {
+    return await connectAndRun(db => db.none("INSERT INTO reviewpage(username,dining,dish,review) VALUES ($1, $2, $3, $4)", [username, dining, dish, review]));
+}
+
+async function helperUserReview(username) {
+    return await connectAndRun(db => db.any('SELECT * from reviewpage WHERE username = $1 ;', username));
+}
+
+async function helperAllReviews() {
+    return await connectAndRun(db => db.any('SELECT * from reviewpage;'));
+}
+
+export async function deleteReview(id) {
+    return await connectAndRun(db => db.none("DELETE FROM reviewpage WHERE id = $1", id));
+}
+
+export async function updateReview(id, dining, dish, review) {
+    return await connectAndRun(db => db.none("UPDATE reviewpage SET dining = $2, dish = $3, review = $4 WHERE id = $1;", [id, dining, dish, review]));
+}
 
 const mc = new minicrypt();
 
-export function returnUserReview(user_id) {
-    let obj1;
-    const arr_1 = [];
-    //search all reviews using user_id, currently not implemented
-    console.log('Returning reviews from database for ' + user_id);
-    for (let i = 0; i < 10; ++i) {
-        obj1 = {};
-        obj1['reviewid'] = faker.random.number();
-        obj1['dining'] = faker.random.number() % 5;
-        obj1['review'] = faker.commerce.productDescription();
-        obj1['dish'] = faker.commerce.product();
-        arr_1.push(obj1);
-    }
-    return arr_1;
+export async function returnUserReview(username) {
+    const reviewArr = await helperUserReview(username);
+    return reviewArr;
 }
 
-export function returnReviews() {
-    let obj1;
-    const arr_1 = [];
-    for (let i = 0; i < 10; ++i) {
-        obj1 = {};
-        obj1['name'] = faker.name.firstName() + " " + faker.name.lastName();
-        obj1['reviewid'] = faker.random.number();
-        obj1['dining'] = faker.random.number() % 5;
-        obj1['review'] = faker.commerce.productDescription();
-        obj1['dish'] = faker.commerce.product();
-        arr_1.push(obj1);
-    }
-    return arr_1;
+export async function returnReviews() {
+    const reviewArr = await helperAllReviews();
+    return reviewArr;
 }
 
 
