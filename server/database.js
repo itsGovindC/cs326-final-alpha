@@ -1,4 +1,55 @@
 import { default as faker } from 'faker';
+
+import minicrypt from './miniCrypt.js'
+
+import pgPromise from 'pg-promise';
+const pgp = pgPromise({
+    connect(client) {
+        console.log('Connected to database:', client.connectionParameters.database);
+    },
+
+    disconnect(client) {
+        console.log('Disconnected from database:', client.connectionParameters.database);
+    }
+});
+
+const username = "postgres";
+const password = "admin";
+
+const url = process.env.DATABASE_URL || `postgres://${username}:${password}@localhost/`;
+const db = pgp(url);
+
+
+async function connectAndRun(task) {
+    let connection = null;
+
+    try {
+        connection = await db.connect();
+        return await task(connection);
+    } finally {
+        try {
+            connection.done();
+        } catch (ignored) {
+            console.log('IGNORED CONNECTION');
+        }
+    }
+}
+
+async function checkUser(username) {
+    return await connectAndRun(db => db.one('SELECT EXISTS(SELECT 1 FROM diningusers WHERE username = $1);', username));
+}
+
+async function returnUser(username) {
+    return await connectAndRun(db => db.one('SELECT * from diningusers WHERE username = $1 LIMIT 1;', username));
+}
+
+async function insertUser(username, salt, hash) {
+    return await connectAndRun(db => db.none("INSERT INTO diningusers VALUES ($1, $2, $3)", [username, salt, hash]));
+}
+
+
+const mc = new minicrypt();
+
 export function returnUserReview(user_id) {
     let obj1;
     const arr_1 = [];
@@ -30,35 +81,30 @@ export function returnReviews() {
     return arr_1;
 }
 
-// we use an in-memory "database"; this isn't persistent but is easy
-let users = { 'emery': 'compsci326' } // default user
 
 // Returns true iff the user exists.
-export function findUser(username) {
-    if (!users[username]) {
-        return false;
-    } else {
-        return true;
-    }
+export async function findUser(username) {
+    const truth = await checkUser(username);
+    return truth.exists;
 }
 
-// Returns true iff the password is the one we have stored (in plaintext = bad but easy).
-export function validatePassword(name, pwd) {
-    if (!findUser(name)) {
+export async function validatePassword(name, pwd) {
+    const foundUser = await findUser(name);
+    if (!foundUser) {
         return false;
     }
-    if (users[name] !== pwd) {
-        return false;
-    }
-    return true;
+    const userVal = await returnUser(name);
+    return mc.check(pwd, userVal.salt, userVal.hash);
 }
 
 // Add a user to the "database".
 // Return true if added, false otherwise (because it was already there).
-export function addUser(name, pwd) {
-    if (findUser(name)) {
+export async function addUser(name, pwd) {
+    const foundUser = await findUser(name);
+    if (foundUser) {
         return false;
     }
-    users[name] = pwd;
+    const resp = mc.hash(pwd);
+    insertUser(name, resp[0], resp[1]);
     return true;
 }
