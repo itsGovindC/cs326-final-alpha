@@ -38,11 +38,11 @@ async function checkUser(username) {
 }
 
 async function returnUser(username) {
-    return await connectAndRun(db => db.any('SELECT * from diningusers WHERE username = $1);', username));
+    return await connectAndRun(db => db.one('SELECT * from diningusers WHERE username = $1);', username));
 }
 
 async function insertUser(username, salt, hash) {
-    return await connectAndRun(db => db.none("INSERT INTO diningusers VALUES ($1, $2, $3);", [username, salt, hash]));
+    return await connectAndRun(db => db.none("INSERT INTO diningusers VALUES ($1, $2, $3)", [username, salt, hash]));
 }
 
 
@@ -79,6 +79,12 @@ export function returnReviews() {
     return arr_1;
 }
 
+// we use an in-memory "database"; this isn't persistent but is easy
+let users = { 'emery' : [
+    '2401f90940e037305f71ffa15275fb0d',
+    '61236629f33285cbc73dc563cfc49e96a00396dc9e3a220d7cd5aad0fa2f3827d03d41d55cb2834042119e5f495fc3dc8ba3073429dd5a5a1430888e0d115250'
+  ] }; // default user
+
 // Returns true iff the user exists.
 export async function findUser(username) {
     const truth = await checkUser(username);
@@ -90,8 +96,9 @@ export async function validatePassword(name, pwd) {
     if (!foundUser) {
 	    return false;
     }
-    const userVal = await returnUser(name);
-	return mc.check(pwd,userVal[0].salt,userVal[1].hash);
+    const userVal = await returnUser(name)
+    console.log(userVal)
+	return mc.check(pwd,userVal.salt,userVal.hash);
 }
 
 // Add a user to the "database".
