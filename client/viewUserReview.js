@@ -2,6 +2,7 @@ async function addReviews() {
     fetch('/viewUserReview', { method: "POST" }).then(data => data.json()).then((success) => {
         const body_1 = document.getElementById('main-review-body');
         let id = 0;
+        console.log(success);
         success.forEach(element => {
             const elem = document.createElement("div");
             elem.classList.add("user-review");
@@ -18,16 +19,16 @@ async function addReviews() {
             dining_hall.selectedIndex = element.dining;
             dish.value = element.dish;
             review.value = element.review;
-            review_id.value = element.reviewid;
+            review_id.value = element.id;
 
             function EventListener_update() {
                 const cur_id = id;
                 return function() {
                     const obj = {};
-                    obj['dining'] = document.getElementById(`Dining Hall-${cur_id}`).value;
+                    obj['dining'] = document.getElementById(`Dining Hall-${cur_id}`).selectedIndex;
                     obj['dish'] = document.getElementById(`Dish-${cur_id}`).value;
                     obj['review'] = document.getElementById(`Review-${cur_id}`).value;
-                    obj['reviewid'] = document.getElementById(`review-id-${cur_id}`).value;
+                    obj['id'] = document.getElementById(`review-id-${cur_id}`).value;
                     fetch('/updateReview', {
                         method: 'POST',
                         body: JSON.stringify(obj)
@@ -39,7 +40,7 @@ async function addReviews() {
                 const cur_id = id;
                 return function() {
                     const obj = {};
-                    obj['reviewid'] = document.getElementById(`review-id-${cur_id}`).value;
+                    obj['id'] = document.getElementById(`review-id-${cur_id}`).value;
                     fetch('/deleteReview', {
                         method: 'POST',
                         body: JSON.stringify(obj)
