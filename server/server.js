@@ -103,6 +103,12 @@ app.post('/login',
         'failureRedirect': '/login' // otherwise, back to login
     }));
 
+app.get('/logout', (req, res) => {
+    req.logout(); // Logs us out!
+    res.redirect('/login'); // back to login
+});
+
+
 // Handle the URL /login (just output the login.html file).
 app.get('/login',
     (req, res) => res.sendFile('client/login.html', { 'root': __dirname }));
@@ -111,7 +117,6 @@ app.post('/register',
     (req, res) => {
         const username = req.body['username'];
         const password = req.body['password'];
-        console.log('jo');
         if (addUser(username, password)) {
             res.redirect('/login');
         } else {
