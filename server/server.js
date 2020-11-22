@@ -93,7 +93,7 @@ function post_authenticate(req, res, next) {
 app.get('/',
     checkLoggedIn,
     (req, res) => {
-        res.sendFile('client/index.html', { 'root': __dirname })
+        res.sendFile('client/index.html', { 'root': __dirname }) ;
     });
 
 // Handle post data from the login.html form.

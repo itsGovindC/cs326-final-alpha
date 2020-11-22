@@ -10,12 +10,12 @@
 
   If you'd like to learn more about the theory and maths behind cryptography, then take 466 next semester. Great professor.
  */
-import crypto from 'crypto'
+import crypto from 'crypto';
 /**
   @module miniCrypt
   @desc A tiny crypto lib for the 326 kids.
  */
-let minicrypt = (function() {
+const minicrypt = (function() {
   /**
     @constructor
     @arg {number} its - The number of iterations to be performed; higher iterations means more security but slower speed.
