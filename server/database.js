@@ -1,6 +1,4 @@
-import { default as faker } from 'faker';
-
-import minicrypt from './miniCrypt.js'
+import minicrypt from './miniCrypt.js';
 
 import pgPromise from 'pg-promise';
 const pgp = pgPromise({
