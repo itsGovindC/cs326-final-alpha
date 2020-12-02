@@ -89,11 +89,11 @@ function post_authenticate(req, res, next) {
         res.end('{}');
     }
 }
-
+//redirects based on user login, but this is index page
 app.get('/',
     checkLoggedIn,
     (req, res) => {
-        res.sendFile('client/index.html', { 'root': __dirname }) ;
+        res.sendFile('client/index.html', { 'root': __dirname });
     });
 
 // Handle post data from the login.html form.
@@ -102,7 +102,7 @@ app.post('/login',
         'successRedirect': '/', // when we login, go to /private 
         'failureRedirect': '/login' // otherwise, back to login
     }));
-
+//when user clicks logout button on index page
 app.get('/logout', (req, res) => {
     req.logout(); // Logs us out!
     res.redirect('/login'); // back to login
@@ -112,7 +112,7 @@ app.get('/logout', (req, res) => {
 // Handle the URL /login (just output the login.html file).
 app.get('/login',
     (req, res) => res.sendFile('client/login.html', { 'root': __dirname }));
-
+//endpoint to add user to database
 app.post('/register',
     (req, res) => {
         const username = req.body['username'];
@@ -128,36 +128,37 @@ app.post('/register',
 app.get('/register',
     (req, res) => res.sendFile('client/register.html', { 'root': __dirname }));
 
+//the viewUserReview html page    
 app.get('/viewUserReview',
     checkLoggedIn, // If we are logged in (notice the comma!)...
     (req, res) => { // Go to the user's page.
         res.sendFile('client/viewUserReview.html', { 'root': __dirname });
     });
-
+//endpoint returns data for user reviews
 app.post('/viewUserReview',
     post_authenticate,
     async function(req, res) {
         res.end(JSON.stringify(await returnUserReview(req.user)));
     });
-
+//for the html page
 app.get('/leaveReview',
     checkLoggedIn, // If we are logged in (notice the comma!)...
     (req, res) => { // Go to the user's page.
         res.sendFile('client/leaveReview.html', { 'root': __dirname });
     });
-
+//get endpoint for html page
 app.get('/viewReview',
     checkLoggedIn, // If we are logged in (notice the comma!)...
     (req, res) => { // Go to the user's page.
         res.sendFile('client/viewReview.html', { 'root': __dirname });
     });
-
+//post endpoint to return all the reviews for the reviews page
 app.post('/readReviews',
     post_authenticate,
     async function(req, res) {
         res.end(JSON.stringify(await returnReviews()));
     });
-
+//post endpoint that receives data about review to update
 app.post('/updateReview', post_authenticate, (req, res) => {
     let body = '';
     req.on('data', data => body += data);
@@ -165,11 +166,11 @@ app.post('/updateReview', post_authenticate, (req, res) => {
         const data = JSON.parse(body);
         console.log('Updated: ' + JSON.stringify(data));
         updateReview(data.id, data.dining, data.dish, data.review);
-        //update score here through database code updateDatabase(data)
     });
     res.writeHead(202);
     res.end();
 });
+//post endpoint that receives data about review to delete
 app.post('/deleteReview', post_authenticate, (req, res) => {
     let body = '';
     req.on('data', data => body += data);
@@ -177,24 +178,24 @@ app.post('/deleteReview', post_authenticate, (req, res) => {
         const data = JSON.parse(body);
         console.log('deleted review with id : ' + data.id);
         deleteReview(data.id);
-        //update score here through database code updateDatabase(data)
     });
     res.writeHead(200);
     res.end();
 });
+//endpoint that receives review to insert 
 app.post('/createReview', post_authenticate, (req, res) => {
     let body = '';
     req.on('data', data => body += data);
     req.on('end', () => {
         const data = JSON.parse(body);
-        //create score here through database code
+
         insertReview(req.user, data.dining, data.dish, data.review);
         console.log(JSON.stringify(data));
     });
     res.writeHead(201);
     res.end();
 });
-
+//endpoint to return all other files
 app.get('*', (req, res) => {
     const parsed = parse(req.url, true);
     const filename = parsed.pathname === '/' ? "index.html" : parsed.pathname.replace('/', '');

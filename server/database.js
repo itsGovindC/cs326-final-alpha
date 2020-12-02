@@ -17,7 +17,7 @@ const password = "admin";
 const url = process.env.DATABASE_URL || `postgres://${username}:${password}@localhost/`;
 const db = pgp(url);
 
-
+//lecture code to connect to databse and run a particular command
 async function connectAndRun(task) {
     let connection = null;
 
@@ -33,10 +33,11 @@ async function connectAndRun(task) {
     }
 }
 
+//function to check if username exists
 async function checkUser(username) {
     return await connectAndRun(db => db.one('SELECT EXISTS(SELECT 1 FROM diningusers WHERE username = $1);', username));
 }
-
+//function to return user relevant information, used for minicrypt
 async function returnUser(username) {
     return await connectAndRun(db => db.one('SELECT * from diningusers WHERE username = $1 LIMIT 1;', username));
 }
@@ -67,11 +68,12 @@ export async function updateReview(id, dining, dish, review) {
 
 const mc = new minicrypt();
 
+//returns user reviews
 export async function returnUserReview(username) {
     const reviewArr = await helperUserReview(username);
     return reviewArr;
 }
-
+//helps to ensure that reviews returned are in proper format
 export async function returnReviews() {
     const reviewArr = await helperAllReviews();
     return reviewArr;
@@ -81,9 +83,10 @@ export async function returnReviews() {
 // Returns true iff the user exists.
 export async function findUser(username) {
     const truth = await checkUser(username);
-    return truth.exists;
+    return truth.exists; //exists is a field returned by sql query 
 }
 
+//validating password by using database
 export async function validatePassword(name, pwd) {
     const foundUser = await findUser(name);
     if (!foundUser) {
