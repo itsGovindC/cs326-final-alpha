@@ -6,6 +6,7 @@ window.addEventListener('load', async function() {
         str_dish = str_dish.toLowerCase();
         sent_data['dish'] = str_dish;
         sent_data['review'] = document.getElementById('Review').value;
+        //create an object out of fields filled up on page and then send post request containing data
         fetch('/createReview', {
             method: 'POST',
             body: JSON.stringify(sent_data)
