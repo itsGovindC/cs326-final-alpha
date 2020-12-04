@@ -6,6 +6,8 @@
 
 # Overview
 
+Link: https://cs326-final-alpha.herokuapp.com/
+
 Our website is a dining hall review page, that allows students to login and leave a review, and also be able to read reviews from other students. They leave review on dishes found at the UMass Dining Halls (4 dining halls, as well as Blue Wall).
 
 There already exists a UMass Dining app, but it does not have a mechanism for student feedback. We thought that this website would potentially be useful to new and old students alike, to select better food at Dining Halls. It could also be used to measure Dining Hall Performance.
