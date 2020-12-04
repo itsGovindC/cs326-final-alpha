@@ -15,4 +15,5 @@ reviewpage database
 | review       | text      | description of the food reviewed |
 
 Pari Yogesh- the initial set up of the username database, did 50% of the work for the passport functions, did the implementation of the hashing functions
+
 Govind Chandak- bug fixed implementations, finished the passport functions and set up all functions required for the review page database and did the deployment
